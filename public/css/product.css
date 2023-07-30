@@ -68,7 +68,7 @@ main {
 
 button {
     font: inherit;
-    color: #b700ff;
+    color: black;
     border-radius: 3px;
     cursor: pointer;
 }
