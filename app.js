@@ -27,6 +27,29 @@ app.post('/user/signup', async (req, res, next) => {
     }
 })
 
+app.post('/user/login', (req, res, next) => {
+    const email = req.body.email;
+    const password = req.body.password;
+    User.findAll({where: {email: email}})
+    .then(products => {
+        const product = products[0];
+        if(product) {
+           if(product.password === password)
+           res.status(200).json({message: "User logged in successfully", success: true});
+           else
+           res.status(500).json({Error: "Wrong password", success: false});
+        }
+        else {
+            res.status(404).json({Error: "User not found!"})
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(404).json({Error: "User not found!"})
+    })
+    
+})
+
 sequelize.sync()
 .then(() => {
     console.log("Server Online...");
