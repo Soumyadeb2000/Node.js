@@ -1,72 +1,37 @@
-const path = require('path');
-
 const express = require('express');
+
+const User = require('./models/user');
+
+const sequelize = require('./utils/database');
+
 const bodyParser = require('body-parser');
 
-const errorController = require('./controllers/error');
-const sequelize = require('./util/database');
+const cors = require('cors');
+
 const app = express();
 
-const Product = require('./models/product');
-const User = require('./models/user');
-const Cart = require('./models/cart')
-const CartItem = require('./models/cart-item')
+app.use(cors());
 
-app.set('view engine', 'ejs');
-app.set('views', 'views');
+app.use(bodyParser.json({extended: false}));
 
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
-
-app.use((req, res, next) => {
-    User.findByPk(1)
-    .then(user => {
-        req.user = user;
-        next();
-    })
-    .catch(err => {
-        console.log(err);
-    })
-})
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/admin', adminRoutes);
-app.use(shopRoutes);
-
-app.use(errorController.get404);
-
-Product.belongsTo(User)
-User.hasMany(Product);
-User.hasOne(Cart);
-Cart.belongsTo(User);
-Cart.belongsToMany(Product, {through: CartItem});
-Product.belongsToMany(Cart, {through: CartItem});
-
-
-
-sequelize
-// .sync({force: true})
-.sync()
-.then((res) => {
-    return User.findByPk(1);
-})
-.then(user => {
-    if(!user) {
-        return User.create({name: 'monu', email: 'test@test.com'});
+app.post('/user/signup', async (req, res, next) => {
+    try {
+        const name = req.body.name;
+        const email = req.body.email;
+        const password = req.body.password;
+        const data = await User.create({name: name, email: email, password: password});
+        res.status(200).json({newUserData: data});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({Error: 'Something went wrong'});
     }
-    return user;
 })
-.then(user => {
-    user.createCart();
-   
-})
-.then(cart => {
+
+sequelize.sync()
+.then(() => {
+    console.log("Server Online...");
     app.listen(3000);
 })
-.catch(err => {
-    console.log(err);
-})
+.catch(err => console.log(err))
 
 

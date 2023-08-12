@@ -39,6 +39,7 @@
             try {
                 axios.post("http://localhost:3000/user/signup",obj)
             } catch (error) {
+                alert(`${error}`);
                 console.log(error);
             }
         }
