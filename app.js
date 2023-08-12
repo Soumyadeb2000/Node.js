@@ -31,13 +31,13 @@ app.post('/user/login', (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     User.findAll({where: {email: email}})
-    .then(products => {
-        const product = products[0];
-        if(product) {
-           if(product.password === password)
-           res.status(200).json({message: "User logged in successfully", success: true});
+    .then(users => {
+        const user = users[0];
+        if(user) {
+           if(user.password === password)
+           res.status(200).json({message: "User login successful", success: true});
            else
-           res.status(500).json({Error: "Wrong password", success: false});
+           res.status(401).json({Error: "User not authorized", success: false});
         }
         else {
             res.status(404).json({Error: "User not found!"})
@@ -47,14 +47,11 @@ app.post('/user/login', (req, res, next) => {
         console.log(err);
         res.status(404).json({Error: "User not found!"})
     })
-    
-})
+});
 
 sequelize.sync()
 .then(() => {
     console.log("Server Online...");
     app.listen(3000);
 })
-.catch(err => console.log(err))
-
-
+.catch(err => console.log(err));
