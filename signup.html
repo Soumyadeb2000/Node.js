@@ -27,7 +27,7 @@
         </div>
     </div>
     <script>
-         function signup(event) 
+        async function signup(event) 
         {
             event.preventDefault();
             let name = event.target.name.value;
@@ -37,7 +37,8 @@
                 name, email, password
             };
             try {
-                axios.post("http://localhost:3000/user/signup",obj)
+                await axios.post("http://localhost:3000/user/signup",obj);
+                window.location.href = './login.html';
             } catch (error) {
                 alert(`${error}`);
                 console.log(error);

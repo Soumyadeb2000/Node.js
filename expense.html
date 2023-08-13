@@ -54,11 +54,13 @@
             const amount = event.target.amount.value;
             const category = event.target.category.value;
             const description = event.target.description.value;
+            // const loginId = localStorage.getItem("loginId");
             const obj = {
                 amount, category, description
             };
             try {
-                axios.post("http://localhost:3000/expense/add-expense",obj);
+                const token = localStorage.getItem("token");
+                axios.post("http://localhost:3000/expense/add-expense", obj, {headers: {'Authorization': token}});
                 showOnScreen(obj);
             } catch (error) {
                 console.log(error);
@@ -76,7 +78,8 @@
             childElm.appendChild(deleteBtn);
             deleteBtn.onclick = () => {
             try {
-                axios.delete(`http://localhost:3000/expense/delete-expense/${data.id}`)
+                const token = localStorage.getItem('token');
+                axios.delete(`http://localhost:3000/expense/delete-expense/${data.id}`, {headers: {"Authorization": token}});
                 parentElm.removeChild(childElm);
             } catch (error) {
                 console.log(error);
@@ -86,7 +89,8 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             try {
-                let response = await axios.get('http://localhost:3000/expense/get-expense');
+                const token = localStorage.getItem('token');
+                let response = await axios.get('http://localhost:3000/expense/get-expense', {headers: {"Authorization": token}});
                 for(let i=0 ; i<response.data.expenses.length ; i++) {
                     showOnScreen(response.data.expenses[i]);
                 }
