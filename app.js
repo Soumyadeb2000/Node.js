@@ -4,9 +4,13 @@ const User = require('./models/user');
 
 const Expense = require('./models/expense');
 
+const Order = require('./models/order')
+
 const userRoutes = require('./router/user');
 
 const expenseRoutes = require('./router/expense');
+
+const purchaseRoutes = require('./router/purchase')
 
 const sequelize = require('./utils/database');
 
@@ -24,8 +28,13 @@ app.use('/user', userRoutes);
 
 app.use('/expense', expenseRoutes);
 
+app.use('/purchase', purchaseRoutes);
+
 User.hasMany(Expense);
 Expense.belongsTo(User);
+
+User.hasMany(Order);
+Order.belongsTo(User);
 
 sequelize.sync()
 .then(() => {

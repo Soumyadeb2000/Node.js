@@ -19,11 +19,11 @@ exports.deleteExpense = async (req, res, next) => {
 exports.getExpenses = (req, res, next) => {
     Expense.findAll({where: {userId: req.user.id}})
     .then(expense => {
-        res.status(200).json({expenses: expense});
+        return res.status(200).json({expenses: expense});
     })
     .catch(err => {
         console.log(err);
-        res.status(404).json({error: "Data not found!"})
+        return res.status(404).json({error: "Data not found!"})
     })
 }
 
@@ -33,10 +33,10 @@ exports.postExpense = async (req, res, next) => {
         const category = req.body.category;
         const description = req.body.description;
         const data = await Expense.create({amount: amount, category: category, description: description, userId: req.user.id});
-        res.status(200).json({newExpenseData: data});
+        return res.status(200).json({newExpenseData: data});
     } catch (error) {
         console.log(error);
-        res.status(500).json({Error: "Something went wrong"})
+        return res.status(500).json({Error: "Something went wrong"})
     }
 
 }

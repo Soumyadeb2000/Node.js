@@ -15,6 +15,6 @@ exports.Authenticate = (req, res ,next) => {
             console.log(err);
         })
     } catch (error) {
-        res.status(500).json({Error: "Something went"});
+        return res.status(500).json({Error: "Something went"});
     }
 }
