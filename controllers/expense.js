@@ -5,14 +5,14 @@ exports.deleteExpense = async (req, res, next) => {
         const eid = req.params.id;
         if(eid === 'undefined' || eid === 'null' || eid === '') {
             console.log("Invalid id");
-            res.status(500).json({err: "Invalid id"});
+            return res.status(500).json({err: "Invalid id"});
         }
         await Expense.destroy({where: {id: eid, userId: req.user.id}});
-        res.status(201).json({res: "Deletion successful"});
+        return res.status(201).json({res: "Deletion successful"});
         
     } catch (error) {
         console.log(("Something went wrong!"));
-        res.status(500).json({err: "Something went wrong!"})
+        return res.status(500).json({err: "Something went wrong!"})
     }
 }    
 

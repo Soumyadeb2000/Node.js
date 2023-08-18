@@ -4,6 +4,14 @@ const Order = require('../models/order');
 
 const User = require('../models/user');
 
+const jwt = require('jsonwebtoken');
+
+const userController = require('./user');
+
+function generateAccessToken (user, premium) {
+    return jwt.sign({user: user, isPremium: premium}, '9453565636banku');
+}
+
 exports.purchasePremium = (req, res, reject) => {
     try {
         const rzp = new Razorpay({
@@ -27,21 +35,22 @@ exports.purchasePremium = (req, res, reject) => {
 }
 
 exports.updateTransactionStatus = async (req, res, next) => {
-    try {
+    try { 
+        console.log(req.user.isPremium);
         const orderId = req.body.orderId;
         const updatedPaymentId = req.body.paymentId;
         const status = req.body.status;
         const orders = await Order.findAll({where: {orderId: orderId}});
         const order = orders[0];
-        if(status === "SUCCESSFULL") {
+        if(status === "SUCCESSFUL") {
             const promise1 = order.update({paymentId: updatedPaymentId, status: status});
-            const promise2 = User.update({isPremium: true}, {where: {id: req.user.id}}); 
+            const promise2 = req.user.update({isPremium: true}); 
             await Promise.all([promise1, promise2]);
-            return res.status(201).json({status: "Transaction successful"});
+            return res.status(201).json({status: "Transaction successful", token: generateAccessToken(req.user)});
         }
         else {
             const promise1 = order.update({paymentId: updatedPaymentId, status: status});
-            const promise2 = User.update({isPremium: false}, {where: {id: req.user.id}}); 
+            const promise2 = req.user.update({isPremium: false}); 
             await Promise.all([promise1, promise2]);
             return res.json({status: "Transaction failed"});
         }

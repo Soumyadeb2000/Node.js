@@ -10,26 +10,38 @@
 <body>
     <div class="container" style="margin-top: 1rem;">
         <div class="row">
-            <div class="col-12">
-                <h1 class="fw-bolder text-center" style="font-family: sans-serif; color:mediumaquamarine;">EXPENSE MANAGER</h1>
+            <div class="col-7 ">
+                <h1 class="fw-bolder" style="font-family: sans-serif; color:mediumaquamarine;">EXPENSE MANAGER</h1>
             </div>
-            <div class="m-2 col-12 " style="background-color:mediumaquamarine ;">
+            <div id="razorpayParent" class="col-5">
+                <input type="button" name="razorpay" id="razorpay" value="Buy Premium" style="background-color: mediumaquamarine; color: white; border-color: mediumaquamarine;" class="btn float-end">
+            </div>
+            <div class="m-2 offset-md-3 " style="background-color:mediumaquamarine ;">
                 <h3 style="color: white;">Expenses</h3>
             </div>
             <div class="row-cols-lg">
-                <ul id="list-group">
+                <ul id="list-items">
+                
+                </ul>
+            </div>
+            <div id="show-leaderboard" class="m-2 offset-md-3  " style="background-color:mediumaquamarine ;">
+                
+            </div>
+            <div class="row-cols-lg">
+                <ul id="leaderboard-items">
                 
                 </ul>
             </div>
             
-            <div class="col-md-6 offset-md-3 border p-3 md-3 shadow" style="background-color: mediumaquamarine; margin-top: 10rem;">
+            
+            <div class="col-md-5 offset-md-3 border p-2 md-2 shadow" style="background-color: mediumaquamarine; margin-top: 10rem;">
                 <form method="POST" onsubmit="saveExpense(event)">
-                    <div class="col-6">
+                    <div class="col-14">
                         <label for="amount"></label>
                         <input type="number" name="amount" id="amount" class="form-control" placeholder="Amount" required>    
                     </div>
                     <label for="category"></label>
-                    <div class="col-6">
+                    <div class="col-14">
                         <select class="form-select" name="category" id="category" placeholder="Category">
                             <option value="food">Food</option>
                             <option value="rent">Rent</option>
@@ -39,17 +51,14 @@
                             <option value="miscellaneous">Miscellaneous</option>
                         </select>
                     </div>
-                    <div class="col-6">
+                    <div class="col-14">
                         <label for="description"></label>
                         <input type="text" name="description" id="description" class="form-control" placeholder="Description">    
                     </div>
-                    <input type="submit" value="Add expense" class="btn btn-light float-end" style="border-color: mediumaquamarine;">
+                    <input type="submit" value="Add expense" class="btn btn-light float-end mt-2" style="border-color: mediumaquamarine;">
                 </form>
             </div>
         </div>
-    </div>
-    <div id="razorpayParent" class="float-end m-4">
-        <input type="button" name="razorpay" id="razorpay" value="Buy Premium" style="background-color: mediumaquamarine; color: white; border-color: mediumaquamarine;" class="btn">
     </div>
     <script>
         function saveExpense(event) {
@@ -70,7 +79,7 @@
         }
 
         function showOnScreen(data) {
-            let parentElm = document.getElementById('list-group');
+            let parentElm = document.getElementById('list-items');
             let childElm = document.createElement('li')
             childElm.textContent = "Amount: Rs." + data.amount + " -  Category: " + data.category + " -  Description: " + data.description + " ";
             parentElm.appendChild(childElm);
@@ -92,6 +101,18 @@
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 const token = localStorage.getItem('token');
+                function parseJwt(token) {
+                    if (!token) {
+                        return;
+                    }
+                    const base64Url = token.split(".")[1];
+                    const base64 = base64Url.replace("-", "+").replace("_", "/");
+                    return JSON.parse(window.atob(base64));
+                }
+                const premiumUser = parseJwt(token);
+                if(premiumUser.user.isPremium) {
+                    showPremium();
+                }
                 let response = await axios.get('http://localhost:3000/expense/get-expense', {headers: {"Authorization": token}});
                 for(let i=0 ; i<response.data.expenses.length ; i++) {
                     showOnScreen(response.data.expenses[i]);
@@ -101,21 +122,54 @@
             }
         })
 
-        document.getElementById('razorpay').onclick = async (e) => {
+        function showPremium() {
             var rzpBtn = document.getElementById('razorpay');
             var parentElm = document.getElementById('razorpayParent');
+            var showPremium = document.createElement('p')
+            showPremium.classList = "float-end";
+            showPremium.textContent = "You are premium user";
+            var lbdBtn = document.createElement('input');
+            lbdBtn.type = 'button';
+            lbdBtn.value = 'Leaderboards';
+            lbdBtn.id = 'leaderboardsButton'
+            lbdBtn.classList = 'btn float-end';
+            lbdBtn.style = "background-color: mediumaquamarine; color: white; border-color: mediumaquamarine;"
+            parentElm.removeChild(rzpBtn);
+            parentElm.appendChild(lbdBtn);
+            parentElm.appendChild(showPremium);
+            document.getElementById('leaderboardsButton').onclick = async () => {
+                showLeaderboard();
+            }
+        }
+
+        async function showLeaderboard() {
+            var ldbParent = document.getElementById('show-leaderboard');
+            var h3 = document.createElement('h3');
+            h3.style = "color: white;";
+            h3.textContent = "Leaderboards";
+            ldbParent.appendChild(h3);
+            const leaderboardUl = document.getElementById('leaderboard-items')
+            const response = await axios.get('http://localhost:3000/premium/showLeaderboard');
+            console.log(response);
+            response.data.forEach(userDetails => {
+                leaderboardUl.innerHTML += `<li> Name: ${userDetails.name} - Total expenses: ${userDetails.amount}`
+            });
+        }
+        document.getElementById('razorpay').onclick = async (e) => {
+            
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/purchase/premium-membership', {headers: {"Authorization": token}})
             let options = {
                 "key": response.data.key_id,
                 "order_id": response.data.order.id,
                 "handler": async function (response) {
-                    await axios.post('http://localhost:3000/purchase/updateTransactionStatus', {
+                    const res = await axios.post('http://localhost:3000/purchase/updateTransactionStatus', {
                         orderId: options.order_id,
                         paymentId: response.razorpay_payment_id,
                         status: 'SUCCESSFUL'
                         }, {headers: {"Authorization": token}});
-                        parentElm.removeChild(rzpBtn); 
+                        showPremium();
+                        localStorage.setItem('token', res.data.token);
                     alert("You are premium user");    
                 }
             };

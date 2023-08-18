@@ -5,8 +5,8 @@ const jwt = require('jsonwebtoken');
 exports.Authenticate = (req, res ,next) => {
     try {
         const token = req.header('Authorization');
-        const user = jwt.verify(token, '9453565636banku');
-        User.findByPk(user.userId)
+        const login = jwt.verify(token, '9453565636banku');
+        User.findByPk(login.user.id)
         .then(user => {
             req.user = user;
             next();
