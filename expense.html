@@ -152,7 +152,7 @@
             const response = await axios.get('http://localhost:3000/premium/showLeaderboard');
             console.log(response);
             response.data.forEach(userDetails => {
-                leaderboardUl.innerHTML += `<li> Name: ${userDetails.name} - Total expenses: ${userDetails.amount}`
+                leaderboardUl.innerHTML += `<li> Name: ${userDetails.name} - Total expenses: ${userDetails.totalExpense}`
             });
         }
         document.getElementById('razorpay').onclick = async (e) => {

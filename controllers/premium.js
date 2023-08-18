@@ -2,32 +2,25 @@ const User = require('../models/user');
 
 const Expense = require('../models/expense');
 
-exports.leaderboards = async (req, res) => {
+const Sequelize = require('sequelize');
+
+exports.leaderboards = async (req, res, next) => {
     try {
-        var userTotalExpense = {};
-        const users = await User.findAll();
-        const leaderboardDetails = [];
-        const expenses = await Expense.findAll();
-        expenses.forEach(expense => {
-            if(userTotalExpense[expense.userId]) {
-                userTotalExpense[expense.userId] = userTotalExpense[expense.userId] + expense.amount;
-            }
-            else {
-                userTotalExpense[expense.userId] = expense.amount;
-            }
+        var leaderboard = await User.findAll({
+            attributes: ['id', 'name', [Sequelize.fn('sum', Sequelize.col('expenses.amount')), 'totalExpense']],
+            include: [
+                {
+                    model: Expense,
+                    attributes: []
+                }
+            ],
+            group: ['user.id'],
+            order: [['totalExpense', 'DESC']]
         });
-        console.log(userTotalExpense);
-        
-        users.forEach(user => {
-            // console.log(user.id);
-            leaderboardDetails.push({name: user.name, amount: userTotalExpense[user.id]});
-        });
-        leaderboardDetails.sort((a,b) => b.amount - a.amount);
-        console.log(leaderboardDetails);
-        res.status(201).json(leaderboardDetails);
-    } catch (error) {
+        console.log(leaderboard);
+        res.status(201).json(leaderboard);
+    } catch(error) {  
         console.log(error);
-        res.status(500).json({Error: 'Something went wrong'});
+        res.status(500).json({Error: error});
     }
-    
 }
