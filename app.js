@@ -14,6 +14,8 @@ const purchaseRoutes = require('./router/purchase');
 
 const premiumRoutes = require('./router/premium');
 
+const passwordRoutes = require('./router/forgotpassword');
+
 const sequelize = require('./utils/database');
 
 const bodyParser = require('body-parser');
@@ -33,6 +35,8 @@ app.use('/expense', expenseRoutes);
 app.use('/purchase', purchaseRoutes);
 
 app.use('/premium', premiumRoutes);
+
+app.use('/password', passwordRoutes);
 
 User.hasMany(Expense);
 Expense.belongsTo(User);
