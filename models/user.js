@@ -22,7 +22,9 @@ const User = sequelize.define('user', {
         unique: true
     },
 
-    isPremium:  Sequelize.BOOLEAN
+    isPremium:  Sequelize.BOOLEAN,
+
+    totalExpense: Sequelize.INTEGER
 
 })
 
