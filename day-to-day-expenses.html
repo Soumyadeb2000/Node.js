@@ -68,11 +68,18 @@
            
         </table>
     </div>
-    <div class="download float-end m-5">
-        <input type="button" value="Download expenses">
+    <div id="downloadBtn" class="float-end m-5">
     </div>
 
     <script>
+        function showDownloadButton() {
+            const parentElm = document.getElementById('downloadBtn');
+            const btn = document.createElement('input')
+            btn.type = 'button';
+            btn.value = 'Download expenses';
+            parentElm.appendChild(btn);
+        }
+
         function showOnScreen(data) {
             let parentElm = document.getElementById('list-items');
             let childElm = document.createElement('li')
@@ -90,6 +97,10 @@
                     const base64Url = token.split(".")[1];
                     const base64 = base64Url.replace("-", "+").replace("_", "/");
                     return JSON.parse(window.atob(base64));
+                }
+                const premiumUser = parseJwt(token);
+                if(premiumUser.user.isPremium) {
+                    showDownloadButton();
                 }
                 let response = await axios.get('http://localhost:3000/expense/get-expense', {headers: {"Authorization": token}});
                 for(let i=0 ; i<response.data.expenses.length ; i++) {
