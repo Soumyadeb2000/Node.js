@@ -2,11 +2,7 @@ const Razorpay = require('razorpay');
 
 const Order = require('../models/order');
 
-const User = require('../models/user');
-
 const jwt = require('jsonwebtoken');
-
-const userController = require('./user');
 
 function generateAccessToken (user, premium) {
     return jwt.sign({user: user, isPremium: premium}, '9453565636banku');
