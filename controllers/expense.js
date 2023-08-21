@@ -2,7 +2,62 @@ const Expense = require('../models/expense');
 
 const User = require('../models/user');
 
+const DownloadedFiles = require('../models/downloadFiles');
+
 const sequelize = require('../utils/database');
+
+const AWS = require('aws-sdk');
+
+const userServices = require('../services/userservices');
+
+require('dotenv').config();
+
+async function sendToS3(data, fileName) {
+    try {
+        const BUCKET_NAME = 'expensemanagerappbymonu';
+        const IAM_USER_KEY = process.env.IAM_USER_KEY;
+        const IAM_USER_SECRET = process.env.IAM_USER_SECRET;
+        const bucket = new AWS.S3({
+            accessKeyId: IAM_USER_KEY,
+            secretAccessKey:IAM_USER_SECRET
+        })
+        var params = {
+            Bucket: BUCKET_NAME,
+            Key: fileName,
+            Body: data,
+            ACL: 'public-read'
+        }
+        return new Promise((resolve, reject) => {
+            bucket.upload(params, (err, res) => {
+                if(err) {
+                    console.log(err);
+                    reject(err);
+                }
+                else {
+                    console.log(res);
+                    resolve(res.Location);
+                }
+            })
+        })
+    } catch (error) {
+        return res.status(500).json({error: 'Something went wrong', message: error.message});
+    }
+     
+}
+
+exports.download = async (req, res) => {
+    try {
+        const id = req.user.id;
+        const expenses = await userServices.getExpenses(req);
+        const stringifiedExpenses = JSON.stringify(expenses);
+        const fileName = `Expenses${id}(${new Date()}).txt`
+        const url = await sendToS3(stringifiedExpenses, fileName);
+        await DownloadedFiles.create({name: req.user.name, url: url, userId: id})
+        res.status(200).json({fileUrl: url, status: 'success'});
+    } catch (error) {
+        res.status(500).json({fileUrl: '', status: 'fail', error: error.message});
+    }
+}
 
 exports.deleteExpense = async (req, res, next) => {
     const t = await sequelize.transaction();
@@ -23,7 +78,7 @@ exports.deleteExpense = async (req, res, next) => {
         
     } catch (error) {
         await t.rollback();
-        return res.status(500).json({err: "Something went wrong!"})
+        return res.status(500).json({err: error.message})
     }
 }    
 
@@ -54,7 +109,7 @@ exports.postExpense = async (req, res, next) => {
         return res.status(200).json({newExpenseData: data});    
     } catch (error) {
         await t.rollback();
-        return res.status(500).json({Error: "Something went wrong"})
+        return res.status(500).json({Error: error.message});
     }
 
 }
