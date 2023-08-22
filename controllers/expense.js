@@ -9,8 +9,11 @@ const sequelize = require('../utils/database');
 const AWS = require('aws-sdk');
 
 const userServices = require('../services/userservices');
+const { NUMBER } = require('sequelize');
 
 require('dotenv').config();
+
+const ITEMS_PER_PAGE = 3;
 
 async function sendToS3(data, fileName) {
     try {
@@ -84,8 +87,16 @@ exports.deleteExpense = async (req, res, next) => {
 
 exports.getExpenses = async (req, res, next) => {
     try {
-        const expenses = await Expense.findAll({where: {userId: req.user.id}})
-        return res.status(200).json({expenses: expenses});
+        let page = req.params.page;
+        const expenses = await Expense.findAll({where: {userId: req.user.id}, offset: (page-1)*ITEMS_PER_PAGE, limit: ITEMS_PER_PAGE})
+        const totalExpenses = await Expense.count();
+        return res.status(200).json({expenses: expenses,
+                                     currentPage: page,
+                                     hasPreviousPage: (page > 1),
+                                     previousPage: page-1,
+                                     hasNextPage: page*ITEMS_PER_PAGE < totalExpenses,
+                                     nextPage: (page*1)+1                       
+                                    });
     } catch (error) {
         return res.status(404).json({error: "Data not found!"})
     }
