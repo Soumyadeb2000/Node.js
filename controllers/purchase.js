@@ -4,17 +4,19 @@ const Order = require('../models/order');
 
 const jwt = require('jsonwebtoken');
 
+require('dotenv').config();
+
 function generateAccessToken (user, premium) {
-    return jwt.sign({user: user, isPremium: premium}, '9453565636banku');
+    return jwt.sign({user: user, isPremium: premium}, process.env.JWT_CODE);
 }
 
 exports.purchasePremium = (req, res, reject) => {
     try {
         const rzp = new Razorpay({
-            key_id: 'rzp_test_6oDul5ZsQ2fJe7',
-            key_secret: 'fRZSbLYjlKikpKMksuUaqCcY'
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: RAZORPAY_KEY_SECRET
         })
-        const amount = 2500;
+        const amount = process.env.PREMIUM_PURCHASE_COST;
         
         rzp.orders.create({amount, currency: "INR"}, async (err, order) => {
             if(err) {

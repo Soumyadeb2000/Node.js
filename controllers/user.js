@@ -5,19 +5,19 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const generateAccessToken = (user, premium) => {
-    return jwt.sign({user: user, isPremium: premium}, '9453565636banku');
+    return jwt.sign({user: user, isPremium: premium}, process.env.JWT_CODE);
 }
 
 exports.signup = (req, res, next) => {
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
-    bcrypt.hash(password, 10, async (err, hash) => {
+    bcrypt.hash(password, process.env.SALT_ROUNDS, async (err, hash) => {
         try {
             const data = await User.create({name: name, email: email, password: hash, totalExpense: 0});
             return res.status(200).json({newUserData: data});
         } catch (error) {
-            console.log(error);
+            console.log(err);
             return res.status(500).json({Error: 'User with similar email exists'});
         }
         

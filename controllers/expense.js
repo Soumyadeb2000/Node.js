@@ -9,7 +9,6 @@ const sequelize = require('../utils/database');
 const AWS = require('aws-sdk');
 
 const userServices = require('../services/userservices');
-const { NUMBER } = require('sequelize');
 
 require('dotenv').config();
 

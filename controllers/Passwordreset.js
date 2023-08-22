@@ -23,7 +23,7 @@ exports.updatePassword =  async (req, res) => {
             return res.status(404).json({ error: 'Password reset request not found or invalid.' });
         }
         const user = await User.findAll({ where: { id: request[0].userId } });
-        const saltRounds = 10;
+        const saltRounds = process.env.SALT_ROUNDS;
         bcrypt.genSalt(saltRounds, function(err, salt) {
             if(err) {
                 console.log(err);
@@ -84,7 +84,7 @@ exports.sendResetUrlMail = async (req, res) => {
         const user = await User.findOne({where: {email: receiverEmail}});
         await user.createForgotPasswordRequest({id: id, isActive: true}, {transaction: t});
         const sender = {
-            email: 'soumyadebsutradhar@gmail.com'
+            email: process.env.SENDER_EMAIL
         };
         const  receivers = [
             {
