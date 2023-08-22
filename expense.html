@@ -44,7 +44,7 @@
                     </div>
                     <label for="category"></label>
                     <div class="col-14">
-                        <select class="form-select" name="category" id="category" placeholder="Category">
+                        <select class="form-select" name="category" id="category">
                             <option value="food">Food</option>
                             <option value="rent">Rent</option>
                             <option value="grocery">Grocery</option>
@@ -72,6 +72,21 @@
         function showPaginationButtons({currentPage, hasPreviousPage, previousPage, hasNextPage, nextPage}) {
             const parentElm = document.getElementById('paginateBtns');
             const expenseList = document.getElementById('list-items')
+            const pageQuantity = document.createElement('select');
+            pageQuantity.id = 'pageQuantity';
+            pageQuantity.innerHTML = `<option>Display quantity</option>
+                                      <option value="3">3</option>
+                                      <option value="5">5</option>
+                                      <option value="10">10</option>
+                                      <option value="15">15</option>
+                                      <option value="20">20</option>
+                                      <option value="30">30</option>
+                                      <option value="40">40</option>`;
+            parentElm.appendChild(pageQuantity);
+            pageQuantity.addEventListener('change', (event) => {
+                localStorage.setItem('pageQuantity', event.target.value);
+                getExpenses(currentPage);
+            })
             if(hasPreviousPage) {
                 const childElm = document.createElement('input');
                 childElm.type = 'button';
@@ -88,7 +103,7 @@
             const childElm = document.createElement('input');
             childElm.type = 'button';
             childElm.value = currentPage;
-            childElm.classList = 'p-2';
+            childElm.classList = 'm-2 p-2';
             parentElm.appendChild(childElm);
             childElm.onclick = () => {
                 parentElm.removeChild(childElm);
@@ -112,12 +127,15 @@
         }
 
         async function getExpenses(page) {
+
+            let expenseListParentElm = document.getElementById('list-items');
             const parentElm = document.getElementById('paginateBtns');
             parentElm.innerHTML = "";
+            const pageQuantity = localStorage.getItem('pageQuantity');
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/expense/get-expense/${page}`, {headers: {"Authorization": token}});
+            const response = await axios.get(`http://localhost:3000/expense/get-expense/${page}`, {headers: {"Authorization": token}, params: {"limit": localStorage.getItem('pageQuantity')}});
             const {expenses, ...paginate} = response.data;
-            console.log(paginate);
+            expenseListParentElm.innerHTML = "";
             for(let i=0 ; i<response.data.expenses.length ; i++) {
                     showOnScreen(expenses[i]);
                 }
@@ -211,7 +229,7 @@
                     showDownloadButton();
                     showDownloadFilesList();
                 }
-                let response = await axios.get(`http://localhost:3000/expense/get-expense/${page}`, {headers: {"Authorization": token}});
+                let response = await axios.get(`http://localhost:3000/expense/get-expense/${page}`, {headers: {"Authorization": token}, params: {"limit": localStorage.getItem('pageQuantity')}});
                 let {expenses, ...paginate} = response.data;
                 getExpenses(paginate.currentPage);
             } catch (error) {

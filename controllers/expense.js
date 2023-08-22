@@ -13,7 +13,7 @@ const { NUMBER } = require('sequelize');
 
 require('dotenv').config();
 
-const ITEMS_PER_PAGE = 3;
+let ITEMS_PER_PAGE = 3;
 
 async function sendToS3(data, fileName) {
     try {
@@ -85,8 +85,11 @@ exports.deleteExpense = async (req, res, next) => {
     }
 }    
 
-exports.getExpenses = async (req, res, next) => {
+exports.getExpenses = async (req, res) => {
+    
     try {
+        ITEMS_PER_PAGE = 1*(req.query.limit);
+        console.log(ITEMS_PER_PAGE);
         let page = req.params.page;
         const expenses = await Expense.findAll({where: {userId: req.user.id}, offset: (page-1)*ITEMS_PER_PAGE, limit: ITEMS_PER_PAGE})
         const totalExpenses = await Expense.count();
