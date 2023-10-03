@@ -1,0 +1,35 @@
+Ans 1) == operator is a conditional operator which is used to compare only values whereas === operator is used to compare both values as well as data type.
+
+
+
+Ans 2) null value need to be explicitly assigned to a variable, whereas undefined value is implicitly set during runtime if a variable is accessed before getting initialized or in case we have not passed the required argument to a function and we access that parameter inside the function.
+
+
+
+Ans 3) console.log(null === undefined) will log false because even having similar values, type of both the values are different whereas console.log(null == undefined) will log true because only the values will be checked and not their types.
+
+
+
+Ans 5) Function currying can be defined as creating a new function from an existing function by presetting the arguments of the existing function. This helps in reusing functions and allows us to not rewrite the function again. Currying can be done in two ways: -
+
+i) using bind method
+
+ii) using function clusures
+
+For example, 
+
+const multiply = function (a, b) {
+
+    console.log(a*b);
+
+}
+
+const multiplyByTwo = multiply.bind(this, 2);
+
+multiplyByTwo(5);
+
+The above code consists of a function expression named multiply. This function takes 2 parameters a and b and logs their product. Here, a copy of the multiply function is created using bind keyword and assigned to variable multiplyByTwo. This function is curried by changing its parameter from x to 2. Now we have reused the function multiply(x, y) that logs product of two numbers passed, to create a new function multiplyByTwo(x) that will log the x multiple of 2.
+
+
+
+Ans 6) 
