@@ -9,7 +9,6 @@ const mongoConnect = cb => {
     console.log('Connected');
     _db = client.db();
     cb();
-
   })
   .catch(err => {
     console.log(err);
