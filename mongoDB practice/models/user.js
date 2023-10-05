@@ -1,5 +1,4 @@
 const mongodb = require('mongodb');
-const nodemon = require('nodemon');
 const getDb = require('../util/database').getDB;
 
 class User {
